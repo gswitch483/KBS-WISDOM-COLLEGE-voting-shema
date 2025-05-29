@@ -1,0 +1,1 @@
+# KBS-WISDOM-COLLEGE-voting-shema
