@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>  
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sierra Leone Event Voting System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#3b82f6',
+                            foreground: '#ffffff'
+                        }
+                    }
+                }
+            }
+        } 
+    </script>
+    <style>
+        .vote-card {
+            box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+        }
+        .loading {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .gradient-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+        .success-message {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+        .error-message {
+            background-color: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+        .warning-message {
+            background-color: #fffbeb;
+            border-color: #fed7aa;
+            color: #d97706;
+        }
+        .phone-input {
+            padding-left: 3rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-slate-200">
+        <div class="max-w-md mx-auto px-4 py-6">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-900">Event Voting System</h1>
+                <p class="text-slate-600 mt-1">Cast your vote for Sierra Leone's finest talents</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 py-6">
+        <div class="max-w-md mx-auto">
+            <!-- Voting Form Card -->
+            <div class="bg-white vote-card border border-slate-200 rounded-lg overflow-hidden">
+                <!-- Card Header -->
+                <div class="gradient-header text-white p-6">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h2 class="text-lg font-semibold">Cast Your Vote</h2>
+                    </div>
+                </div>
+                <!-- Voting Form -->
+                <form id="votingForm" autocomplete="off" class="space-y-6 p-6">
+                    <!-- Personal Information -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-slate-900 border-b border-slate-100 pb-2">
+                            Personal Information
+                        </h3>
+                        <!-- Full Name -->
+                        <div class="space-y-2">
+                            <label for="voterName" class="block text-sm font-medium text-slate-700">Full Name</label>
+                            <input
+                                type="text"
+                                id="voterName"
+                                name="voterName"
+                                placeholder="Enter your full name"
+                                class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                required
+                            />
+                            <div id="voterNameError" class="text-sm text-red-600 hidden"></div>
+                        </div>
+
+                        <!-- National ID -->
+                        <div class="space-y-2">
+                            <label for="voterId" class="block text-sm font-medium text-slate-700">National ID</label>
+                            <input
+                                type="text"
+                                id="voterId"
+                                name="voterId"
+                                placeholder="Enter your national ID"
+                                class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                required
+                            />
+                            <div id="voterIdError" class="text-sm text-red-600 hidden"></div>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="space-y-2">
+                            <label for="phone" class="block text-sm font-medium text-slate-700">Phone Number</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-slate-500 text-sm">+232</span>
+                                </div>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    placeholder="XX XXX XXXX"
+                                    class="phone-input w-full py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                    maxlength="10"
+                                    required
+                                />
+                            </div>
+                            <p class="text-xs text-slate-500">Sierra Leone phone number (8 digits after country code)</p>
+                            <div id="phoneError" class="text-sm text-red-600 hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Voting Section -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-slate-900 border-b border-slate-100 pb-2">
+                            Cast Your Vote
+                        </h3>
+                        
+                        <!-- Event Category -->
+                        <div class="space-y-2">
+                            <label for="category" class="block text-sm font-medium text-slate-700">Event Category</label>
+                            <select
+                                id="category"
+                                name="category"
+                                class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                required
+                            >
+                                <option value="">Choose a category</option>
+                                <option value="fashion">Fashion Show</option>
+                                <option value="poetry">Poetry Slam</option>
+                                <option value="beauty">Beauty Pageant</option>
+                                <option value="messing">Messing Can</option>
+                                <option value="show">Talent Show</option>
+                            </select>
+                            <div id="categoryError" class="text-sm text-red-600 hidden"></div>
+                        </div>
+
+                        <!-- Select Contestant -->
+                        <div class="space-y-2">
+                            <label for="contestant" class="block text-sm font-medium text-slate-700">Select Contestant</label>
+                            <select
+                                id="contestant"
+                                name="contestant"
+                                class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                disabled
+                                required
+                            >
+                                <option value="">First select a category</option>
+                            </select>
+                            <div id="contestantError" class="text-sm text-red-600 hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button
+                        type="submit"
+                        id="submitBtn"
+                        class="w-full bg-primary hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-md flex items-center justify-center space-x-2 transition-colors duration-200"
+                    >
+                        <span id="submitText">Submit Vote</span>
+                        <svg id="submitIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div
+                            id="loadingIcon" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full loading hidden">
+                        </div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Message Display -->
+            <div id="messageDisplay" class="mt-6 hidden">
+                <div id="messageContent" class="rounded-lg border p-4">
+                    <div class="flex items-start space-x-3">
+                        <div id="messageIcon" class="w-5 h-5 mt-0.5 flex-shrink-0"></div>
+                        <div class="flex-1 min-w-0">
+                            <p id="messageTitle" class="text-sm font-medium"></p>
+                            <p id="messageText" class="text-sm mt-1 opacity-75"></p>
+                        </div>
+                        <button id="messageClose" class="flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voting Guidelines -->
+            <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-start space-x-3">
+                    <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="text-sm text-blue-800">
+                        <p class="font-medium mb-1">Voting Guidelines</p>
+                        <ul class="space-y-1 text-blue-700">
+                            <li>• One vote per person per category</li>
+                            <li>• SMS confirmation will be sent to your phone</li>
+                            <li>• Votes cannot be changed once submitted</li>
+                            <li>• Valid Sierra Leone phone number required</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 pb-8">
+        <div class="max-w-md mx-auto px-4 text-center">
+            <p class="text-xs text-slate-500">
+                Secure voting system powered by Firebase & Twilio SMS
+            </p>
+            <p class="text-xs text-slate-400 mt-1">
+                Your vote is confidential and securely stored
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Contestant data
+        const contestants = {
+            fashion: ["Aminata Kamara", "Fatima Sesay", "Mariama Turay", "Isata Bangura", "Zainab Conteh"],
+            poetry: ["Mohamed Kamara", "Adama Sesay", "Ibrahim Turay", "Salieu Bangura", "Abdul Conteh"],
+            beauty: ["Sia Kamara", "Memuna Sesay", "Kumba Turay", "Tenneh Bangura", "Kadiatu Conteh"],
+            messing: ["Alpha Kamara", "Brima Sesay", "Foday Turay", "Sorie Bangura", "Amara Conteh"],
+            show: ["Alie Kamara", "Binta Sesay", "Chernor Turay", "David Bangura", "Emma Conteh"]
+        };
+
+        const categoryLabels = {
+            fashion: "Fashion Show",
+            poetry: "Poetry Slam",
+            beauty: "Beauty Pageant",
+            messing: "Messing Can",
+            show: "Talent Show"
+        };
+
+        // Store votes in localStorage
+        let votesStorage = JSON.parse(localStorage.getItem('votes') || '[]');
+
+        // DOM elements
+        const form = document.getElementById('votingForm');
+        const categorySelect = document.getElementById('category');
+        const contestantSelect = document.getElementById('contestant');
+        const phoneInput = document.getElementById('phone');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const submitIcon = document.getElementById('submitIcon');
+        const loadingIcon = document.getElementById('loadingIcon');
+        const messageDisplay = document.getElementById('messageDisplay');
+        const messageContent = document.getElementById('messageContent');
+        const messageIcon = document.getElementById('messageIcon');
+        const messageTitle = document.getElementById('messageTitle');
+        const messageText = document.getElementById('messageText');
+        const messageClose = document.getElementById('messageClose');
+
+        // Phone number formatting
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '').slice(0, 8);
+            if (value.length >= 6) {
+                value = `${value.slice(0, 2)} ${value.slice(2, 5)} ${value.slice(5)}`;
+            } else if (value.length >= 3) {
+                value = `${value.slice(0, 2)} ${value.slice(2)}`;
+            }
+            e.target.value = value;
+            clearError('phone');
+        });
+
+        // Category change handler
+        categorySelect.addEventListener('change', function(e) {
+            const category = e.target.value;
+            contestantSelect.innerHTML = '<option value="">Choose a contestant</option>';
+            
+            if (category && contestants[category]) {
+                contestantSelect.disabled = false;
+                contestants[category].forEach(contestant => {
+                    const option = document.createElement('option');
+                    option.value = contestant;
+                    option.textContent = contestant;
+                    contestantSelect.appendChild(option);
+                });
+            } else {
+                contestantSelect.disabled = true;
+                contestantSelect.innerHTML = '<option value="">First select a category</option>';
+            }
+            clearError('category');
+        });
+
+        // Clear errors when user starts typing (input/change events)
+        ['voterName', 'voterId'].forEach(field => {
+            document.getElementById(field).addEventListener('input', () => clearError(field));
+        });
+        ['category', 'contestant'].forEach(field => {
+            document.getElementById(field).addEventListener('change', () => clearError(field));
+        });
+
+        // Clear error function
+        function clearError(field) {
+            const errorElement = document.getElementById(field + 'Error');
+            const inputElement = document.getElementById(field);
+            errorElement.classList.add('hidden');
+            inputElement.classList.remove('border-red-500');
+        }
+
+        // Show error function
+        function showError(field, message) {
+            const errorElement = document.getElementById(field + 'Error');
+            const inputElement = document.getElementById(field);
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+            inputElement.classList.add('border-red-500');
+        }
+
+        // Validation function
+        function validateForm(formData) {
+            const errors = {};
+
+            if (!formData.voterName.trim()) {
+                errors.voterName = "Full name is required";
+            } else if (formData.voterName.trim().length < 2) {
+                errors.voterName = "Name must be at least 2 characters";
+            }
+
+            if (!formData.voterId.trim()) {
+                errors.voterId = "National ID is required";
+            } else if (formData.voterId.trim().length < 3) {
+                errors.voterId = "Please enter a valid national ID";
+            }
+
+            const phoneDigits = formData.phone.replace(/\D/g, "");
+            if (!phoneDigits) {
+                errors.phone = "Phone number is required";
+            } else if (phoneDigits.length !== 8) {
+                errors.phone = "Phone number must be 8 digits";
+            } else if (!/^[2378]/.test(phoneDigits)) {
+                errors.phone = "Phone number must start with 2, 3, 7, or 8";
+            }
+
+            if (!formData.category) {
+                errors.category = "Please select a category";
+            }
+
+            if (!formData.contestant) {
+                errors.contestant = "Please select a contestant";
+            }
+
+            return errors;
+        }
+
+        // Check for duplicate vote
+        function checkDuplicateVote(voterId, category) {
+            return votesStorage.find(vote => 
+                vote.voterId === voterId && vote.category === category
+            );
+        }
+
+        // Show message function
+        function showMessage(type, title, text) {
+            messageDisplay.classList.remove('hidden');
+            messageContent.className = 'rounded-lg border p-4';
+            if (type === 'success') {
+                messageContent.classList.add('success-message');
+                messageIcon.innerHTML = `
+                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                `;
+            }
+            else if (type === 'error') {
+                messageContent.classList.add('error-message');
+                messageIcon.innerHTML = `
+                    <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                `;
+            } else if (type === 'warning') {
+                messageContent.classList.add('warning-message');
+                messageIcon.innerHTML = `
+                    <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                `;
+            }
+            messageTitle.textContent = title;
+            messageText.textContent = text;
+        }
+
+        // Hide message function
+        function hideMessage() {
+            messageDisplay.classList.add('hidden');
+        }
+
+        // Message close handler
+        messageClose.addEventListener('click', hideMessage);
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const voteData = {
+                voterName: formData.get('voterName'),
+                voterId: formData.get('voterId'),
+                phone: formData.get('phone'),
+                category: formData.get('category'),
+                contestant: formData.get('contestant')
+            };
+
+            // Clear previous errors
+            ['voterName', 'voterId', 'phone', 'category', 'contestant'].forEach(clearError);
+            hideMessage();
+
+            // Validate form
+            const errors = validateForm(voteData);
+
+            if (Object.keys(errors).length > 0) {
+                Object.keys(errors).forEach(field => {
+                    showError(field, errors[field]);
+                });
+                return;
+            }
+
+            // Check for duplicate vote
+            const existingVote = checkDuplicateVote(voteData.voterId, voteData.category);
+            if (existingVote) {
+                showMessage('warning', 'Already voted',
+                    `You have already voted in the ${categoryLabels[voteData.category]} category. Each person can only vote once per category.`);
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitText.textContent = 'Submitting...';
+            submitIcon.classList.add('hidden');
+            loadingIcon.classList.remove('hidden');
+
+            // Simulate API call
+            setTimeout(() => {
+                // Create vote record
+                const vote = {
+                    ...voteData,
+                    id: Date.now(),
+                    timestamp: new Date().toISOString(),
+                    phone: voteData.phone.replace(/\D/g, '')
+                };
+                votesStorage.push(vote);
+                localStorage.setItem('votes', JSON.stringify(votesStorage));
+
+                showMessage('success', 'Vote Submitted',
+                    `Your vote for ${voteData.contestant} in ${categoryLabels[voteData.category]} has been recorded. SMS confirmation sent to +232 ${voteData.phone.replace(/\D/g, '')}.`);
+
+                // Reset form
+                form.reset();
+                contestantSelect.disabled = true;
+                contestantSelect.innerHTML = '<option value="">First select a category</option>';
+                phoneInput.value = '';
+
+                // Reset button state
+                submitBtn.disabled = false;
+                submitText.textContent = 'Submit Vote';
+                submitIcon.classList.remove('hidden');
+                loadingIcon.classList.add('hidden');
+
+            }, 2000); // 2 second delay to simulate network request
+        });
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Sierra Leone Voting System initialized');
+            console.log(`Stored votes: ${votesStorage.length}`);
+        });
+    </script>
+</body>
+</html>
